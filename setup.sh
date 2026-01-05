@@ -5,10 +5,9 @@ apt-get clean
 apt update && apt install -y ffmpeg curl python3-pip libass-dev fonts-dejavu
 
 echo "--- [2/5] Installing AI & Web Frameworks (Optimized) ---"
-pip cache purge
-
-pip install fastapi uvicorn pydantic opencv-python yt-dlp numpy openai-whisper \
-torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu118
+pip install openai-whisper --no-deps
+pip install fastapi uvicorn pydantic opencv-python yt-dlp numpy tiktoken fonttools
 
 echo "--- [3/5] Downloading Face Detection Models ---"
 mkdir -p /root/vastclip/shorts

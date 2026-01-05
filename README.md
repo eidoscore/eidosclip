@@ -1,5 +1,7 @@
 # EidosCLIP - AI-Powered Auto Clipper!
 
+![enter image description here](https://avatars.githubusercontent.com/u/40323224?v=4)
+
 eidosclip adalah tools yang digunakan untuk membuat short video otomatis dari youtube video, Workflow **n8n** ini mengotomatiskan seluruh proses pembuatan konten Shorts dari podcast. Mulai dari submit transkrip, analisis AI, hingga rendering di GPU Cloud (**Vast.ai**) dan upload otomatis ke **YouTube**.
 
 [Register Vast.ai Account](https://cloud.vast.ai/?ref_id=378254)
