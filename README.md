@@ -56,3 +56,39 @@ StackEdit stores your files in your browser, which means all your files are auto
 
 - **Auto SEO & YouTube Upload**: Otomatisasi pembuatan judul, deskripsi, tags, dan upload ke channel.
 - **Google Sheets Integration**: Pelacakan status pengerjaan dan database konten secara otomatis.
+
+### ⚙️ Instalasi & Persiapan Awal
+
+    -   git clone https://github.com/eidoscore/eidosclip.git.
+    - chmod +x setup.sh
+
+- Jalanin Code
+  - python3 main.py
+
+Untuk Menjalankan di Background bisa menggunakan PM2 atau buat screen baru
+
+Ikuti langkah-langkah berikut untuk mereplikasi sistem ini di infrastruktur kamu sendiri:
+
+#### 1. Persiapan n8n (Orchestrator)
+
+- **Import Workflow**: Download file `.json` workflow dari repositori ini dan import ke instance n8n kamu.
+- **n8n Form Trigger**: Aktifkan node **On form submission** untuk mendapatkan URL publik tempat kamu akan memasukkan data transkrip.
+- **Credentials**: Siapkan akun di n8n untuk melakukan **HTTP Requests** ke API eksternal (DeepSeek & Vast.ai).
+
+#### 2. Konfigurasi DeepSeek (AI Logic)
+
+- **API Key**: Dapatkan API Key dari [DeepSeek Platform](https://platform.deepseek.com/).
+- **Setup Node**: Masukkan API Key tersebut ke dalam node **DeepSeek API**.
+- **Model**: Pastikan menggunakan model `deepseek-chat` agar pemrosesan transkrip menjadi segmen JSON berjalan lancar.
+
+#### 3. Setup Vast.ai (GPU Rendering & DNN)
+
+- **Sewa Instance**: Pilih instance GPU di **Vast.ai** yang memiliki kecepatan upload/download tinggi untuk menangani file video besar.
+- **Environment**: Gunakan Docker image yang sudah terinstal Python, FFmpeg, dan library AI (seperti OpenCV dengan modul **DNN**) untuk menjalankan fitur **Smart Crop**.
+- **Config Server Node**: Masukkan API Key Vast.ai dan ID Instance kamu ke dalam node **Config Server** agar n8n bisa mengontrol server secara otomatis.
+- **IP Discovery**: Pastikan node **Get Instance IP** sudah terhubung dengan benar agar n8n selalu mendapatkan alamat IP terbaru setiap kali instance dijalankan ulang.
+
+#### 4. Integrasi Final
+
+- **HTTP Request (Process)**: Hubungkan node ini ke endpoint di server Vast.ai yang bertugas memproses transkrip awal.
+- **HTTP Request (Render)**: Pastikan node ini mengarah ke script renderer di Vast.ai yang akan melakukan eksekusi pemotongan video (cropping/trimming) menggunakan perintah dari DeepSeek.
