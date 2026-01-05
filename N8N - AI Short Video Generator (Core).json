@@ -1,0 +1,203 @@
+{
+  "name": "AI Short Video Generator (Core)",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Kamu adalah editor podcast profesional. Tugasmu memilih 4-8 segmen terbaik dari transkrip yang diberikan.\\n\\nATURAN KETAT DURASI:\\n1. Tiap segmen WAJIB memiliki durasi MINIMAL 40 DETIK dan MAKSIMAL 190 DETIK.\\n2. Jika poin pembicaraan aslinya pendek, kamu WAJIB memundurkan waktu 'start' dan memajukan waktu 'end' agar mencakup penjelasan konteks sebelumnya/sesudahnya sehingga durasi minimal 40 detik terpenuhi.\\n3. Jangan memotong kalimat di tengah-tengah.\\n\\nFORMAT OUTPUT WAJIB JSON MURNI:\\n{\\n  \\\"segments\\\": [\\n    {\\\"start\\\": float, \\\"end\\\": float, \\\"title\\\": \\\"Judul Clickbait\\\"}\\n  ]\\n}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Analisis transkrip ini dan berikan 4-8 segmen dengan durasi masing-masing minimal 40 detik: \" + ($('HTTP Request (Process)').item.json.transcript || \"TEKS KOSONG\")\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" }\n})\n}}",
+        "options": {}
+      },
+      "id": "bdd243aa-1363-4920-8c1b-0090be13a2dc",
+      "name": "DeepSeek API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -656,
+        128
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mEnF63VXnexYvVsX",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"vast_api_key\": \"<Your VAST.AI Key>\",\n  \"instance_id\": \"<Vast.ai Instances ID>\",\n  \"deepseek_api_key\": \"<Deepseek API Key>\"\n}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1360,
+        128
+      ],
+      "id": "d0e08bb7-cd9c-4b7f-8926-93a574a59d32",
+      "name": "Config Server"
+    },
+    {
+      "parameters": {
+        "formTitle": "Auto Short Video URL",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "Youtube URL",
+              "fieldLabel": "Youtube URL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -1600,
+        128
+      ],
+      "id": "d2798caa-a40c-45ca-ab12-ff2903615336",
+      "name": "On form submission",
+      "webhookId": "a179d51c-3f61-4651-83c2-ad0581bd9f48"
+    },
+    {
+      "parameters": {
+        "url": "=https://console.vast.ai/api/v0/instances/{{ $node[\"Config Server\"].json.instance_id }}/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $node[\"Config Server\"].json.vast_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1120,
+        128
+      ],
+      "id": "a205ca9d-a38a-43d4-b8ad-f98bf5754af0",
+      "name": "Get Instance IP"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://{{ $json.instances.public_ipaddr }}:63195/process",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"url\": \"{{ $node[\"On form submission\"].json[\"Youtube URL\"] }}\" }",
+        "options": {
+          "timeout": 1000000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -880,
+        128
+      ],
+      "id": "ad1ab5ff-91af-42f0-a953-d99cdff852ec",
+      "name": "HTTP Request (Process)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://{{ $('Get Instance IP').item.json.instances.public_ipaddr }}:63195/render_multi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\n  \"segments\": JSON.parse($node[\"DeepSeek API\"].json.choices[0].message.content).segments,\n  \"original_video_url\": $('HTTP Request (Process)').first().json.url\n})\n}}",
+        "options": {
+          "timeout": 6000000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -432,
+        128
+      ],
+      "id": "0eb2bf02-2389-4a23-95b1-87f568944b6d",
+      "name": "HTTP Request (Render)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "DeepSeek API": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Render)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Server": {
+      "main": [
+        [
+          {
+            "node": "Get Instance IP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Config Server",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Instance IP": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Process)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Process)": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "4445c714-2ee8-4f73-8995-f491f41d0513",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "29c82acaaf0dcb37eed645f00cefeab8c45835994c163b4290fdda5f516ad335"
+  },
+  "id": "eV5jjhyh0CDRGwSW",
+  "tags": []
+}

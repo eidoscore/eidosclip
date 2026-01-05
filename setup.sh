@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "--- [1/5] Updating System & Installing Media Tools ---"
+apt update && apt install -y ffmpeg curl python3-pip libass-dev
+
+echo "--- [2/5] Installing AI & Web Frameworks ---"
+pip install fastapi uvicorn pydantic openai-whisper opencv-python yt-dlp numpy
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+echo "--- [3/5] Downloading Face Detection Models ---"
+mkdir -p /root/vastclip/shorts
+cd /root/vastclip
+curl -L -o deploy.prototxt https://raw.githubusercontent.com/opencv/opencv/master/samples/dnn/face_detector/deploy.prototxt
+curl -L -o res10_300x300_ssd_iter_140000.caffemodel https://raw.githubusercontent.com/opencv/opencv_3rdparty/dnn_samples_face_detector_20170830/res10_300x300_ssd_iter_140000.caffemodel
+
+echo "--- [4/5] Setup Font ---"
+apt install -y fonts-dejavu
+
+echo "--- [5/5] Setup Selesai! ---"
+echo "Pastikan file main.py sudah di /root/vastclip/"
+echo "Jalankan dengan: python3 main.py"
