@@ -8,6 +8,7 @@ echo "--- [2/5] Installing AI & Web Frameworks (Optimized) ---"
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu118
 pip install openai-whisper --no-deps
 pip install fastapi uvicorn pydantic opencv-python yt-dlp numpy tiktoken fonttools
+pip install google-api-python-client google-auth-oauthlib google-auth-httplib2
 
 echo "--- [3/5] Downloading Face Detection Models ---"
 mkdir -p /root/vastclip/shorts

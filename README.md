@@ -1,14 +1,21 @@
 # EidosCLIP - AI-Powered Auto Clipper!
 
 ![enter image description here](https://avatars.githubusercontent.com/u/40323224?v=4)
-
 eidosclip adalah tools yang digunakan untuk membuat short video otomatis dari youtube video, Workflow **n8n** ini mengotomatiskan seluruh proses pembuatan konten Shorts dari podcast. Mulai dari submit transkrip, analisis AI, hingga rendering di GPU Cloud (**Vast.ai**) dan upload otomatis ke **YouTube**.
 
 [Register Vast.ai Account](https://cloud.vast.ai/?ref_id=378254)
 
-# Files
+## Fitur Baru (v2.0)
 
-StackEdit stores your files in your browser, which means all your files are automatically saved locally and are accessible **offline!**
+- **✅ Google Sheets Database**: Sinkronisasi otomatis data segmen ke Spreadsheet. Pantau status render dan upload secara real-time.
+- **✅ Auto YouTube Upload**: Upload otomatis ke YouTube Shorts lengkap dengan judul, deskripsi dinamis, dan 10+ metadata tags per video.
+- **✅ Persistent OAuth System**: Menggunakan sistem `.pickle` token yang bisa melakukan _auto-refresh_, sehingga server bisa upload selamanya tanpa login ulang.
+
+- **✅ Spreadsheet Centralized Control**: Kelola ratusan link video hanya dari satu lembar Google Sheets.
+
+- **✅ Full Metadata SEO**: Tag YouTube terisi otomatis secara rapi per segmen (seperti: _Dune, fear, inspirasi, mindset_) sesuai hasil analisis AI.
+
+- **✅ Smart Storage Management**: File `raw_video.mp4` dan `audio.wav` otomatis dihapus setelah proses selesai untuk menjaga storage tetap lega.
 
 ## 🚀 Fitur Utama
 
@@ -28,15 +35,26 @@ StackEdit stores your files in your browser, which means all your files are auto
 - **Intelligent Silence Removal**: Kemampuan untuk mendeteksi dan membuang bagian hening (silence) yang tidak perlu, sehingga video hasil akhir terasa lebih padat dan "fast-paced".
 -
 
-##
+## 🔄 New Workflow: Spreadsheet-Driven
 
-### 🛠️ Detail Alur Kerja Teknis
+Sistem sekarang bekerja dengan flow yang lebih terorganisir:
 
-1.  **Input Collection**: User submit data via **n8n Form Submission**.
-2.  **Server Handshake**: n8n mengambil IP instance **Vast.ai** yang sedang aktif secara dinamis.
-3.  **NLP Analysis**: **DeepSeek API** membedah transkrip untuk mendapatkan _timestamp_ segmen terbaik.
-4.  **DNN Processing**: Perintah render dikirim ke server; model **DNN** bekerja mendeteksi subjek untuk melakukan _smart crop_ 9:16.
-5.  **Final Execution**: Server menghasilkan file video Shorts yang sudah terpotong sempurna dan siap didistribusikan.
+1.  **Input**: Masukkan URL YouTube ke kolom yang ditentukan di **Google Sheets**.
+2.  **Trigger**: n8n membaca baris baru dari spreadsheet secara berkala.
+3.  **Process**: Script Python di Vast.ai mendownload, mentranskrip (Whisper), dan memotong video.
+4.  **Database Update**: n8n mengupdate status pengerjaan dan link hasil render kembali ke spreadsheet.
+5.  **Distribution**: Video yang sudah siap otomatis diupload ke channel YouTube yang dituju.
+
+## 📁 Struktur Project (EidosCLIP)
+
+Berdasarkan setup terbaru, berikut adalah susunan file utama di `/root/vastclip`:
+
+- `setup.sh`: Script bash untuk instalasi otomatis seluruh tools.
+- `main.py`: Core API server yang menghandle rendering dan upload.
+- `token_xxxx.pickle`: Token akses YouTube yang persisten.
+- `client_secrets.json`: Kredensial OAuth dari Google Cloud Console.
+- `deploy.prototxt` & `res10_300...caffemodel`: Model DNN untuk deteksi wajah (Smart Crop).
+- `shorts/`: Folder penyimpanan hasil akhir video sebelum diupload.
 
 ##
 
@@ -54,43 +72,64 @@ StackEdit stores your files in your browser, which means all your files are auto
 - **YouTube Data API v3**: Diaktifkan di Google Cloud Console.
   The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
 
+## Instalasi Cepat
+
+Gunakan bash script yang sudah disediakan untuk mempersiapkan server dalam hitungan menit:
+
+Bash
+
+```
+# 1. Clone & Masuk Folder
+git clone https://github.com/eidoscore/eidosclip.git
+cd eidosclip
+
+# 2. Jalankan Auto-Installer
+chmod +x setup.sh
+./setup.sh
+
+# 3. Jalankan API Server
+python3 main.py
+```
+
+_Tips: Gunakan `screen` atau `pm2` agar script tetap jalan di background._
+
+### 2. Konfigurasi Google Cloud (YouTube)
+
+- Aktifkan **YouTube Data API v3**.
+- Buat **OAuth 2.0 Client ID** (Web Application).
+- Tambahkan `http://localhost:8080/` ke _Authorized redirect URIs_.
+- Download `client_secret.json` dan taruh di folder root project.
+
+### 3. Autentikasi YouTube (Pertama Kali)
+
+Jalankan script pancingan token di terminal Vast.ai:
+
+Bash
+
+```
+python3 auth.py
+
+```
+
+Ikuti instruksi yang muncul untuk menghasilkan file `token_eidosfinance.pickle`.
+
+### 4. n8n Configuration
+
+- Import file `workflow.json` ke n8n.
+- Sesuaikan node **Config Server** dengan:
+
+  - `DeepSeek API Key`
+  - `Vast.ai IP & Port`
+  - `Google Sheets ID`
+
+## Persiapan Google Sheets & YouTube
+
+1.  **n8n Setup**: Hubungkan node Google Sheets ke spreadsheet lu. Pastikan kolom `URL`, `Status`, dan `YouTube Link` sudah tersedia.
+2.  **OAuth Auth**: Jalankan `python3 auth.py` sekali saja untuk memancing file `.pickle` agar fitur auto-upload jalan selamanya.
+3.  **Metadata**: AI akan otomatis mengisi bagian **Tag** dengan kata kunci relevan untuk meningkatkan SEO video lu di Shorts Feed.
+
 ## 🚧 Roadmap (Fitur Mendatang)
 
-- **Auto SEO & YouTube Upload**: Otomatisasi pembuatan judul, deskripsi, tags, dan upload ke channel.
-- **Google Sheets Integration**: Pelacakan status pengerjaan dan database konten secara otomatis.
-
-### ⚙️ Instalasi & Persiapan Awal
-
-    -   git clone https://github.com/eidoscore/eidosclip.git.
-    - chmod +x setup.sh
-
-- Jalanin Code
-  - python3 main.py
-
-Untuk Menjalankan di Background bisa menggunakan PM2 atau buat screen baru
-
-Ikuti langkah-langkah berikut untuk mereplikasi sistem ini di infrastruktur kamu sendiri:
-
-#### 1. Persiapan n8n (Orchestrator)
-
-- **Import Workflow**: Download file `.json` workflow dari repositori ini dan import ke instance n8n kamu.
-- **n8n Form Trigger**: Aktifkan node **On form submission** untuk mendapatkan URL publik tempat kamu akan memasukkan data transkrip.
-- **Credentials**: Siapkan akun di n8n untuk melakukan **HTTP Requests** ke API eksternal (DeepSeek & Vast.ai).
-
-#### 2. Konfigurasi DeepSeek (AI Logic)
-
-- **API Key**: Dapatkan API Key dari [DeepSeek Platform](https://platform.deepseek.com/).
-- **Setup Node**: Masukkan API Key tersebut ke dalam node **DeepSeek API**.
-- **Model**: Pastikan menggunakan model `deepseek-chat` agar pemrosesan transkrip menjadi segmen JSON berjalan lancar.
-
-#### 3. Setup Vast.ai (GPU Rendering & DNN)
-
-- **Sewa Instance**: Pilih instance GPU di **Vast.ai** yang memiliki kecepatan upload/download tinggi untuk menangani file video besar.
-- **Environment**: Gunakan Docker image yang sudah terinstal Python, FFmpeg, dan library AI (seperti OpenCV dengan modul **DNN**) untuk menjalankan fitur **Smart Crop**.
-- **Config Server Node**: Masukkan API Key Vast.ai dan ID Instance kamu ke dalam node **Config Server** agar n8n bisa mengontrol server secara otomatis.
-- **IP Discovery**: Pastikan node **Get Instance IP** sudah terhubung dengan benar agar n8n selalu mendapatkan alamat IP terbaru setiap kali instance dijalankan ulang.
-
-#### 4. Integrasi Final
-
-- **HTTP Request (Process)**: Hubungkan node ini ke endpoint di server Vast.ai yang bertugas memproses transkrip awal.
-- **HTTP Request (Render)**: Pastikan node ini mengarah ke script renderer di Vast.ai yang akan melakukan eksekusi pemotongan video (cropping/trimming) menggunakan perintah dari DeepSeek.
+- [ ] **TikTok & Instagram Auto-Post**: Ekspansi distribusi konten ke multi-platform.
+- [ ] **Multiple Account Support**: Manajemen banyak channel YouTube dalam satu dashboard n8n.
+- [ ] **AI Voiceover Overlay**: Menambahkan narasi suara AI jika audio asli kurang jelas.
