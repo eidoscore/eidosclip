@@ -1,0 +1,15 @@
+openai-whisper
+fastapi
+uvicorn
+pydantic
+opencv-python
+yt-dlp
+numpy
+tiktoken
+fonttools
+numba
+requests
+google-auth
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
