@@ -66,7 +66,7 @@ Berdasarkan setup terbaru, berikut adalah susunan file utama di `/root/vastclip`
 
 ## ⚙️ Prasyarat (Prerequisites)
 
-- **GPU Nvidia RTX (3090, 4090, atau A-series).**
+- **GPU Nvidia RTX (3090, 4090, atau A-series).** kalo gpu lu busuk dibawah seri itu, perlu ada yg diupdate, ganti `"-c:v", "h264_nvenc", "-preset", "p1", "-b:v", "6M"` jadi `"-c:v", "libx264", "-preset", "ultrafast",` di main.py
 - **n8n**: Instance aktif (Docker/Cloud).
 - **Vast.ai Account**: Instance GPU yang sudah terinstal skrip renderer (ffmpeg/python).
 - **DeepSeek API Key**: Untuk otak analisis segmen.
@@ -112,7 +112,7 @@ python3 auth.py
 
 ```
 
-Ikuti instruksi yang muncul untuk menghasilkan file `token_eidosfinance.pickle`.
+Ikuti instruksi yang muncul untuk menghasilkan file `token.pickle`.
 
 ### 4. n8n Configuration
 
