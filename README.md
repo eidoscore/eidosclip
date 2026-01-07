@@ -66,6 +66,7 @@ Berdasarkan setup terbaru, berikut adalah susunan file utama di `/root/vastclip`
 
 ## ⚙️ Prasyarat (Prerequisites)
 
+- **GPU Nvidia RTX (3090, 4090, atau A-series).**
 - **n8n**: Instance aktif (Docker/Cloud).
 - **Vast.ai Account**: Instance GPU yang sudah terinstal skrip renderer (ffmpeg/python).
 - **DeepSeek API Key**: Untuk otak analisis segmen.
